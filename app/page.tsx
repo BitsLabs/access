@@ -177,6 +177,34 @@ const badgeStyles: Record<string, string> = {
   Expired: "bg-zinc-100 text-zinc-500 border-zinc-200",
 };
 
+const navContent = {
+  Overview: {
+    title: "Entry Operations Overview",
+    description:
+      "Real-time visibility into member access, attendance, and rule compliance. Payment processing is handled externally—Flits Access focuses on frictionless entry.",
+  },
+  "Check-ins": {
+    title: "Live Check-in Control Center",
+    description:
+      "Validate member access, flag exceptions, and move the queue forward without leaving the floor.",
+  },
+  Members: {
+    title: "Member Success Workspace",
+    description:
+      "Review member history, plan usage, and retention signals across the active roster.",
+  },
+  Plans: {
+    title: "Plan & Access Rules",
+    description:
+      "Monitor plan utilization, eligibility windows, and rule enforcement across tiers.",
+  },
+  Analytics: {
+    title: "Attendance Intelligence",
+    description:
+      "Track growth signals, utilization peaks, and actionable insights from attendance data.",
+  },
+};
+
 export default function Home() {
   const [activeNav, setActiveNav] = useState(navItems[0]?.label ?? "Overview");
   const [activeRange, setActiveRange] = useState("Today");
@@ -184,8 +212,8 @@ export default function Home() {
   const [activityFilter, setActivityFilter] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [highlightAlerts, setHighlightAlerts] = useState(false);
-  const [activeStat, setActiveStat] = useState(stats[0]?.label ?? "Active members");
   const [selectedMemberId, setSelectedMemberId] = useState(checkInQueue[0]?.memberId);
+  const activeContent = navContent[activeNav as keyof typeof navContent] ?? navContent.Overview;
 
   const filteredQueue = useMemo(() => {
     return checkInQueue.filter((member) => {
@@ -266,13 +294,8 @@ export default function Home() {
                 <Badge variant="secondary" className="w-fit">
                   {activeNav}
                 </Badge>
-                <h1 className="text-3xl font-semibold tracking-tight">
-                  Entry Operations Overview
-                </h1>
-                <p className="max-w-2xl text-sm text-zinc-500">
-                  Real-time visibility into member access, attendance, and rule compliance. Payment
-                  processing is handled externally—Flits Access focuses on frictionless entry.
-                </p>
+                <h1 className="text-3xl font-semibold tracking-tight">{activeContent.title}</h1>
+                <p className="max-w-2xl text-sm text-zinc-500">{activeContent.description}</p>
               </div>
               <div className="flex flex-wrap gap-3">
                 {["Today", "Week", "Month"].map((range) => (
@@ -290,212 +313,569 @@ export default function Home() {
               </div>
             </header>
 
-            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {stats.map((item) => (
-                <button
-                  key={item.label}
-                  type="button"
-                  onClick={() => setActiveStat(item.label)}
-                  className={cn(
-                    "text-left",
-                    activeStat === item.label && "ring-2 ring-zinc-900 ring-offset-2"
-                  )}
-                >
-                  <Card className="border-zinc-200">
-                    <CardHeader className="pb-3">
-                      <CardDescription>{item.label}</CardDescription>
-                      <CardTitle className="text-2xl text-zinc-900">{item.value}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex items-center justify-between text-xs text-zinc-500">
-                      <span
-                        className={cn(
-                          "font-medium",
-                          item.trend === "up" ? "text-emerald-600" : "text-rose-500"
-                        )}
-                      >
-                        {item.change}
-                      </span>
-                      <span>{item.note}</span>
-                    </CardContent>
-                  </Card>
-                </button>
-              ))}
-            </section>
-
-            <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-              <Card>
-                <CardHeader>
-                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <CardTitle>Live check-in validation</CardTitle>
-                      <CardDescription>
-                        Validate membership access in real time without tying results to payment
-                        status.
-                      </CardDescription>
-                    </div>
-                    <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-                      <Input
-                        placeholder="Search member ID or name"
-                        value={searchTerm}
-                        onChange={(event) => setSearchTerm(event.target.value)}
-                      />
-                      <Button className="h-10">Validate</Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex flex-wrap items-center gap-3">
-                    {["All", "Needs review", "Approved"].map((filter) => (
-                      <Button
-                        key={filter}
-                        size="sm"
-                        variant={queueFilter === filter ? "secondary" : "outline"}
-                        onClick={() => setQueueFilter(filter)}
-                      >
-                        {filter}
-                      </Button>
-                    ))}
-                    <div className="flex items-center gap-2 text-xs text-zinc-500">
-                      <Switch
-                        checked={highlightAlerts}
-                        onCheckedChange={setHighlightAlerts}
-                      />
-                      Highlight exceptions
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    {filteredQueue.map((member) => (
-                      <button
-                        key={member.memberId}
-                        type="button"
-                        onClick={() => setSelectedMemberId(member.memberId)}
-                        className={cn(
-                          "w-full rounded-xl border border-zinc-100 bg-zinc-50/60 p-4 text-left transition hover:border-zinc-200",
-                          selectedMemberId === member.memberId &&
-                            "border-zinc-300 bg-white shadow-sm"
-                        )}
-                      >
-                        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                          <div>
-                            <p className="text-sm font-semibold text-zinc-900">
-                              {member.name}
-                            </p>
-                            <p className="text-xs text-zinc-500">
-                              {member.memberId} · {member.plan}
-                            </p>
-                            <p className="text-xs text-zinc-400">{member.lastVisit}</p>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span
-                              className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
-                                badgeStyles[member.status]
-                              }`}
-                            >
-                              {member.status === "approved"
-                                ? "Access granted"
-                                : member.status === "review"
-                                  ? "Needs review"
-                                  : "Limit reached"}
-                            </span>
-                            <span className="text-xs text-zinc-400">{member.time}</span>
-                            <Button size="sm" variant="outline">
-                              Open profile
-                            </Button>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Access rules snapshot</CardTitle>
-                  <CardDescription>
-                    Plans and eligibility windows currently enforced across the studio.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {accessRules.map((rule) => (
-                    <div key={rule.plan} className="space-y-3 rounded-xl border border-zinc-100 p-4">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-semibold text-zinc-900">{rule.plan}</p>
-                        <Badge variant="secondary">{rule.renewal}</Badge>
-                      </div>
-                      <p className="text-xs text-zinc-500">{rule.rules}</p>
-                      <Progress value={rule.utilizationPercent} />
-                      <p className="text-xs text-zinc-400">{rule.utilization}</p>
+            {activeNav === "Overview" && (
+              <>
+                <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  {stats.map((item) => (
+                    <div key={item.label} className="rounded-2xl">
+                      <Card className="border-zinc-200 transition hover:ring-2 hover:ring-zinc-900 hover:ring-offset-2 hover:ring-offset-zinc-50">
+                        <CardHeader className="pb-3">
+                          <CardDescription>{item.label}</CardDescription>
+                          <CardTitle className="text-2xl text-zinc-900">{item.value}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex items-center justify-between text-xs text-zinc-500">
+                          <span
+                            className={cn(
+                              "font-medium",
+                              item.trend === "up" ? "text-emerald-600" : "text-rose-500"
+                            )}
+                          >
+                            {item.change}
+                          </span>
+                          <span>{item.note}</span>
+                        </CardContent>
+                      </Card>
                     </div>
                   ))}
-                </CardContent>
-              </Card>
-            </section>
+                </section>
 
-            <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Member activity</CardTitle>
-                      <CardDescription>Recent check-ins and access status.</CardDescription>
+                <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <CardTitle>Live check-in validation</CardTitle>
+                          <CardDescription>
+                            Validate membership access in real time without tying results to
+                            payment status.
+                          </CardDescription>
+                        </div>
+                        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                          <Input
+                            placeholder="Search member ID or name"
+                            value={searchTerm}
+                            onChange={(event) => setSearchTerm(event.target.value)}
+                          />
+                          <Button className="h-10">Validate</Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex flex-wrap items-center gap-3">
+                        {["All", "Needs review", "Approved"].map((filter) => (
+                          <Button
+                            key={filter}
+                            size="sm"
+                            variant={queueFilter === filter ? "secondary" : "outline"}
+                            onClick={() => setQueueFilter(filter)}
+                          >
+                            {filter}
+                          </Button>
+                        ))}
+                        <div className="flex items-center gap-2 text-xs text-zinc-500">
+                          <Switch
+                            checked={highlightAlerts}
+                            onCheckedChange={setHighlightAlerts}
+                          />
+                          Highlight exceptions
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        {filteredQueue.map((member) => (
+                          <button
+                            key={member.memberId}
+                            type="button"
+                            onClick={() => setSelectedMemberId(member.memberId)}
+                            className={cn(
+                              "w-full rounded-xl border border-zinc-100 bg-zinc-50/60 p-4 text-left transition hover:border-zinc-200",
+                              selectedMemberId === member.memberId &&
+                                "border-zinc-300 bg-white shadow-sm"
+                            )}
+                          >
+                            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                              <div>
+                                <p className="text-sm font-semibold text-zinc-900">
+                                  {member.name}
+                                </p>
+                                <p className="text-xs text-zinc-500">
+                                  {member.memberId} · {member.plan}
+                                </p>
+                                <p className="text-xs text-zinc-400">{member.lastVisit}</p>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span
+                                  className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                                    badgeStyles[member.status]
+                                  }`}
+                                >
+                                  {member.status === "approved"
+                                    ? "Access granted"
+                                    : member.status === "review"
+                                      ? "Needs review"
+                                      : "Limit reached"}
+                                </span>
+                                <span className="text-xs text-zinc-400">{member.time}</span>
+                                <Button size="sm" variant="outline">
+                                  Open profile
+                                </Button>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Access rules snapshot</CardTitle>
+                      <CardDescription>
+                        Plans and eligibility windows currently enforced across the studio.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {accessRules.map((rule) => (
+                        <div
+                          key={rule.plan}
+                          className="space-y-3 rounded-xl border border-zinc-100 p-4"
+                        >
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-semibold text-zinc-900">{rule.plan}</p>
+                            <Badge variant="secondary">{rule.renewal}</Badge>
+                          </div>
+                          <p className="text-xs text-zinc-500">{rule.rules}</p>
+                          <Progress value={rule.utilizationPercent} />
+                          <p className="text-xs text-zinc-400">{rule.utilization}</p>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </section>
+
+                <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle>Member activity</CardTitle>
+                          <CardDescription>Recent check-ins and access status.</CardDescription>
+                        </div>
+                        <div className="flex gap-2">
+                          {["All", "Attention", "Active"].map((filter) => (
+                            <Button
+                              key={filter}
+                              size="sm"
+                              variant={activityFilter === filter ? "secondary" : "outline"}
+                              onClick={() => setActivityFilter(filter)}
+                            >
+                              {filter}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {filteredActivity.map((member) => (
+                        <div key={member.memberId} className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-zinc-900">{member.name}</p>
+                            <p className="text-xs text-zinc-500">
+                              {member.plan} · {member.lastVisit}
+                            </p>
+                          </div>
+                          <span
+                            className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                              badgeStyles[member.status]
+                            }`}
+                          >
+                            {member.status}
+                          </span>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Attendance analytics</CardTitle>
+                      <CardDescription>
+                        Metrics derived from access events and attendance logs.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid gap-4">
+                      {analytics.map((item) => (
+                        <div
+                          key={item.label}
+                          className="rounded-xl border border-zinc-100 bg-zinc-50/60 p-4"
+                        >
+                          <p className="text-xs text-zinc-500">{item.label}</p>
+                          <p className="mt-2 text-base font-semibold text-zinc-900">
+                            {item.value}
+                          </p>
+                          <p className="mt-1 text-xs text-zinc-400">{item.detail}</p>
+                        </div>
+                      ))}
+                      <Button variant="outline" className="w-full">
+                        Open analytics workspace
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </section>
+              </>
+            )}
+
+            {activeNav === "Check-ins" && (
+              <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+                <Card>
+                  <CardHeader>
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <CardTitle>Validation queue</CardTitle>
+                        <CardDescription>
+                          Handle exceptions, confirm access, and keep the lobby moving.
+                        </CardDescription>
+                      </div>
+                      <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                        <Input
+                          placeholder="Search member ID or name"
+                          value={searchTerm}
+                          onChange={(event) => setSearchTerm(event.target.value)}
+                        />
+                        <Button className="h-10">Validate</Button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      {["All", "Attention", "Active"].map((filter) => (
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex flex-wrap items-center gap-3">
+                      {["All", "Needs review", "Approved"].map((filter) => (
                         <Button
                           key={filter}
                           size="sm"
-                          variant={activityFilter === filter ? "secondary" : "outline"}
-                          onClick={() => setActivityFilter(filter)}
+                          variant={queueFilter === filter ? "secondary" : "outline"}
+                          onClick={() => setQueueFilter(filter)}
                         >
                           {filter}
                         </Button>
                       ))}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {filteredActivity.map((member) => (
-                    <div key={member.memberId} className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-zinc-900">{member.name}</p>
-                        <p className="text-xs text-zinc-500">
-                          {member.plan} · {member.lastVisit}
-                        </p>
+                      <div className="flex items-center gap-2 text-xs text-zinc-500">
+                        <Switch
+                          checked={highlightAlerts}
+                          onCheckedChange={setHighlightAlerts}
+                        />
+                        Highlight exceptions
                       </div>
-                      <span
-                        className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
-                          badgeStyles[member.status]
-                        }`}
-                      >
-                        {member.status}
-                      </span>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
+                    <div className="space-y-4">
+                      {filteredQueue.map((member) => (
+                        <button
+                          key={member.memberId}
+                          type="button"
+                          onClick={() => setSelectedMemberId(member.memberId)}
+                          className={cn(
+                            "w-full rounded-xl border border-zinc-100 bg-zinc-50/60 p-4 text-left transition hover:border-zinc-200",
+                            selectedMemberId === member.memberId &&
+                              "border-zinc-300 bg-white shadow-sm"
+                          )}
+                        >
+                          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                            <div>
+                              <p className="text-sm font-semibold text-zinc-900">
+                                {member.name}
+                              </p>
+                              <p className="text-xs text-zinc-500">
+                                {member.memberId} · {member.plan}
+                              </p>
+                              <p className="text-xs text-zinc-400">{member.lastVisit}</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span
+                                className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                                  badgeStyles[member.status]
+                                }`}
+                              >
+                                {member.status === "approved"
+                                  ? "Access granted"
+                                  : member.status === "review"
+                                    ? "Needs review"
+                                    : "Limit reached"}
+                              </span>
+                              <span className="text-xs text-zinc-400">{member.time}</span>
+                              <Button size="sm" variant="outline">
+                                Open profile
+                              </Button>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Attendance analytics</CardTitle>
-                  <CardDescription>
-                    Metrics derived from access events and attendance logs.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-4">
-                  {analytics.map((item) => (
-                    <div key={item.label} className="rounded-xl border border-zinc-100 bg-zinc-50/60 p-4">
-                      <p className="text-xs text-zinc-500">{item.label}</p>
-                      <p className="mt-2 text-base font-semibold text-zinc-900">{item.value}</p>
-                      <p className="mt-1 text-xs text-zinc-400">{item.detail}</p>
+                <div className="grid gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Exceptions at a glance</CardTitle>
+                      <CardDescription>
+                        Members requiring staff attention before entry is granted.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {checkInQueue
+                        .filter((member) => member.status !== "approved")
+                        .map((member) => (
+                          <div
+                            key={member.memberId}
+                            className="rounded-xl border border-zinc-100 bg-zinc-50/70 p-4"
+                          >
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-semibold text-zinc-900">{member.name}</p>
+                              <Badge variant="outline">{member.memberId}</Badge>
+                            </div>
+                            <p className="mt-2 text-xs text-zinc-500">{member.plan}</p>
+                            <p className="mt-1 text-xs text-zinc-400">{member.lastVisit}</p>
+                          </div>
+                        ))}
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Access rules snapshot</CardTitle>
+                      <CardDescription>
+                        Plans and eligibility windows currently enforced across the studio.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {accessRules.map((rule) => (
+                        <div
+                          key={rule.plan}
+                          className="space-y-3 rounded-xl border border-zinc-100 p-4"
+                        >
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-semibold text-zinc-900">{rule.plan}</p>
+                            <Badge variant="secondary">{rule.renewal}</Badge>
+                          </div>
+                          <p className="text-xs text-zinc-500">{rule.rules}</p>
+                          <Progress value={rule.utilizationPercent} />
+                          <p className="text-xs text-zinc-400">{rule.utilization}</p>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
+              </section>
+            )}
+
+            {activeNav === "Members" && (
+              <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+                <Card>
+                  <CardHeader>
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <CardTitle>Member roster</CardTitle>
+                        <CardDescription>
+                          Recent visits, plan mix, and health of active members.
+                        </CardDescription>
+                      </div>
+                      <div className="flex gap-2">
+                        {["All", "Attention", "Active"].map((filter) => (
+                          <Button
+                            key={filter}
+                            size="sm"
+                            variant={activityFilter === filter ? "secondary" : "outline"}
+                            onClick={() => setActivityFilter(filter)}
+                          >
+                            {filter}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
-                  ))}
-                  <Button variant="outline" className="w-full">
-                    Open analytics workspace
-                  </Button>
-                </CardContent>
-              </Card>
-            </section>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {filteredActivity.map((member) => (
+                      <div
+                        key={member.memberId}
+                        className="flex flex-col gap-3 rounded-xl border border-zinc-100 bg-zinc-50/70 p-4 md:flex-row md:items-center md:justify-between"
+                      >
+                        <div>
+                          <p className="text-sm font-semibold text-zinc-900">{member.name}</p>
+                          <p className="text-xs text-zinc-500">
+                            {member.plan} · {member.memberId}
+                          </p>
+                          <p className="text-xs text-zinc-400">{member.lastVisit}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                              badgeStyles[member.status]
+                            }`}
+                          >
+                            {member.status}
+                          </span>
+                          <Button size="sm" variant="outline">
+                            View profile
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Engagement signals</CardTitle>
+                    <CardDescription>
+                      Prioritize outreach based on recent visit patterns.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {memberActivity.map((member) => (
+                      <div key={member.memberId} className="space-y-2 rounded-xl border border-zinc-100 p-4">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-semibold text-zinc-900">{member.name}</p>
+                          <Badge variant="outline">{member.memberId}</Badge>
+                        </div>
+                        <p className="text-xs text-zinc-500">{member.plan}</p>
+                        <p className="text-xs text-zinc-400">{member.lastVisit}</p>
+                      </div>
+                    ))}
+                    <Button variant="outline" className="w-full">
+                      Export member report
+                    </Button>
+                  </CardContent>
+                </Card>
+              </section>
+            )}
+
+            {activeNav === "Plans" && (
+              <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Plan utilization</CardTitle>
+                    <CardDescription>
+                      Monitor current attendance and capacity across membership tiers.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {accessRules.map((rule) => (
+                      <div key={rule.plan} className="space-y-3 rounded-xl border border-zinc-100 p-4">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-semibold text-zinc-900">{rule.plan}</p>
+                          <Badge variant="secondary">{rule.renewal}</Badge>
+                        </div>
+                        <p className="text-xs text-zinc-500">{rule.rules}</p>
+                        <Progress value={rule.utilizationPercent} />
+                        <p className="text-xs text-zinc-400">{rule.utilization}</p>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline">
+                            Edit rules
+                          </Button>
+                          <Button size="sm" variant="ghost">
+                            View members
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Rule change log</CardTitle>
+                    <CardDescription>
+                      Recent adjustments to eligibility windows and limits.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {[
+                      {
+                        title: "Weekday Access",
+                        detail: "Weekend access disabled · Nov 02",
+                      },
+                      {
+                        title: "6-Class Weekly",
+                        detail: "Limit increased to 6 · Oct 29",
+                      },
+                      {
+                        title: "Unlimited Monthly",
+                        detail: "Peak class caps removed · Oct 22",
+                      },
+                    ].map((log) => (
+                      <div key={log.title} className="rounded-xl border border-zinc-100 p-4">
+                        <p className="text-sm font-semibold text-zinc-900">{log.title}</p>
+                        <p className="mt-1 text-xs text-zinc-500">{log.detail}</p>
+                      </div>
+                    ))}
+                    <Button variant="outline" className="w-full">
+                      Add new plan
+                    </Button>
+                  </CardContent>
+                </Card>
+              </section>
+            )}
+
+            {activeNav === "Analytics" && (
+              <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Attendance insights</CardTitle>
+                    <CardDescription>
+                      Trend snapshots based on the selected reporting window.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-4">
+                    {analytics.map((item) => (
+                      <div
+                        key={item.label}
+                        className="rounded-xl border border-zinc-100 bg-zinc-50/60 p-4"
+                      >
+                        <p className="text-xs text-zinc-500">{item.label}</p>
+                        <p className="mt-2 text-base font-semibold text-zinc-900">
+                          {item.value}
+                        </p>
+                        <p className="mt-1 text-xs text-zinc-400">{item.detail}</p>
+                      </div>
+                    ))}
+                    <Button variant="outline" className="w-full">
+                      Open analytics workspace
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Growth highlights</CardTitle>
+                    <CardDescription>
+                      Focus areas generated from attendance and member behavior.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {[
+                      {
+                        title: "Evening classes trending up",
+                        detail: "Traffic +18% in the last 2 weeks.",
+                      },
+                      {
+                        title: "Churn risk cohort",
+                        detail: "11 members with no visits in 14+ days.",
+                      },
+                      {
+                        title: "Weekend demand",
+                        detail: "Saturday classes at 88% capacity.",
+                      },
+                    ].map((insight) => (
+                      <div key={insight.title} className="rounded-xl border border-zinc-100 p-4">
+                        <p className="text-sm font-semibold text-zinc-900">{insight.title}</p>
+                        <p className="mt-1 text-xs text-zinc-500">{insight.detail}</p>
+                      </div>
+                    ))}
+                    <Button variant="outline" className="w-full">
+                      Download insights
+                    </Button>
+                  </CardContent>
+                </Card>
+              </section>
+            )}
           </div>
         </main>
       </div>
