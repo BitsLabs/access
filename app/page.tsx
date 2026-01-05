@@ -303,14 +303,14 @@ export default function Home() {
                   </div>
                 </CardHeader>
               </Card>
-              <div className="flex gap-2 overflow-x-auto pb-1">
+              <div className="flex flex-wrap gap-2 pb-1 sm:flex-nowrap sm:overflow-x-auto">
                 {navItems.map((item) => (
                   <Button
                     key={item.label}
                     variant={activeNav === item.label ? "secondary" : "outline"}
                     size="sm"
                     onClick={() => setActiveNav(item.label)}
-                    className="shrink-0"
+                    className="whitespace-nowrap"
                   >
                     {item.label}
                   </Button>
