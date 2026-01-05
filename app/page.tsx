@@ -289,6 +289,34 @@ export default function Home() {
 
         <main className="flex-1">
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
+            <div className="flex flex-col gap-4 lg:hidden">
+              <Card className="border-zinc-200 bg-white">
+                <CardHeader className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                    Flits Access
+                  </p>
+                  <div>
+                    <CardTitle className="text-lg">Operations Hub</CardTitle>
+                    <CardDescription>
+                      Manage every entry point with fast validation workflows.
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+              </Card>
+              <div className="flex flex-wrap gap-2 pb-1 sm:flex-nowrap sm:overflow-x-auto">
+                {navItems.map((item) => (
+                  <Button
+                    key={item.label}
+                    variant={activeNav === item.label ? "secondary" : "outline"}
+                    size="sm"
+                    onClick={() => setActiveNav(item.label)}
+                    className="whitespace-nowrap"
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
             <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="space-y-2">
                 <Badge variant="secondary" className="w-fit">
